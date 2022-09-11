@@ -40,7 +40,7 @@ public class FamilyFitnessService {
         AvailableTrackersDto availableTrackersDto = new AvailableTrackersDto();
         List<AvailableTrackerDto> availableTrackerList = new ArrayList<AvailableTrackerDto>();
 
-        for (AvailableTrackersInfoEntity availableTrackersInfoEntity: availableTrackersInfoEntitiesList) {
+        for (AvailableTrackersInfoEntity availableTrackersInfoEntity : availableTrackersInfoEntitiesList) {
             AvailableTrackerDto availableTrackerDto = AvailableTrackerDto
                     .builder()
                     .trackerName(availableTrackersInfoEntity.getName())
@@ -50,7 +50,7 @@ public class FamilyFitnessService {
             availableTrackerList.add(availableTrackerDto);
         }
         availableTrackersDto.setTrackers(availableTrackerList);
-        return  availableTrackersDto;
+        return availableTrackersDto;
     }
 
     public ManageTrackersDto manageTrackers(UserDto userInfoDto) {
@@ -58,7 +58,7 @@ public class FamilyFitnessService {
         ManageTrackersDto manageTrackersDto = new ManageTrackersDto();
         List<ManageTrackerDto> manageTrackerDtoList = new ArrayList<ManageTrackerDto>();
 
-        for (ManageTrackersInfoEntity manageTrackersInfoEntity: manageTrackersInfoEntities) {
+        for (ManageTrackersInfoEntity manageTrackersInfoEntity : manageTrackersInfoEntities) {
             ManageTrackerDto manageTrackerDto = ManageTrackerDto
                     .builder()
                     .trackerName(manageTrackersInfoEntity.getName())
@@ -70,5 +70,16 @@ public class FamilyFitnessService {
         }
         manageTrackersDto.setTrackers(manageTrackerDtoList);
         return manageTrackersDto;
+    }
+
+    public void linkTracker(ManageTrackerDto linkTrackerDto) {
+        ManageTrackersInfoEntity manageTrackersInfoEntity = ManageTrackersInfoEntity
+                .builder()
+                .userId(linkTrackerDto.getUserId())
+                .trackerId(linkTrackerDto.getTrackerId())
+                .name(linkTrackerDto.getTrackerName())
+                .imageUrl(linkTrackerDto.getTrackerImageUrl())
+                .build();
+        manageTrackersInfoRepository.save(manageTrackersInfoEntity);
     }
 }
