@@ -11,14 +11,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "manage_trackers")
-public class ManageTrackersInfoEntity {
+@Table(name = "trackers_data")
+public class TrackerDataInfoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
     private Integer trackerId;
-    private String imageUrl;
+    private Integer steps;
+    private Integer sleepInSeconds;
+    private Integer food;
     private String userId;
-    private LocalDateTime updatedAt;
+    private LocalDateTime date;
+
 }
