@@ -10,6 +10,9 @@ import com.shiva.familyfitnessservice.repository.ManageTrackersInfoRepository;
 import com.shiva.familyfitnessservice.repository.TrackerDataInfoRepository;
 import com.shiva.familyfitnessservice.repository.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -103,7 +106,8 @@ public class FamilyFitnessService {
     }
 
     public List<TrackerDataDto> getTrackerData(Integer trackerId, String userId) {
-        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.trackerDataByUserIdAndTrackerId(userId, trackerId);
+        Pageable pageable = PageRequest.of(0, 7 , Sort.by("date").descending());
+        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.findByUserIdAndTrackerId(userId, trackerId, pageable).getContent();
         List<TrackerDataDto> trackerDataDtoList = new ArrayList<TrackerDataDto>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         for (TrackerDataInfoEntity trackerDataInfoEntity: trackerDataInfoEntityList
@@ -124,7 +128,7 @@ public class FamilyFitnessService {
     public void saveTrackerData(TrackerDataDto trackerDataDto, Integer trackerId, String userId) throws Exception {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate dateTime = LocalDate.parse(trackerDataDto.getDate(), formatter);
-        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.trackerDataByUserIdAndTrackerId(userId, trackerId);
+        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.getByUserIdAndTrackerId(userId, trackerId);
 
         TrackerDataInfoEntity trackerDataInfoEntity = new TrackerDataInfoEntity();;
         if(trackerDataInfoEntityList.size() > 0) {
