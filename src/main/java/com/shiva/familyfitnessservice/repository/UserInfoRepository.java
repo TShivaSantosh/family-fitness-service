@@ -9,4 +9,5 @@ import java.math.BigInteger;
 @Repository
 public interface UserInfoRepository extends JpaRepository<UserInfoEntity, Long> {
     UserInfoEntity findByUserId(String userId);
+    UserInfoEntity findByEmailId(String emailId);
 }

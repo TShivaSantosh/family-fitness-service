@@ -1,14 +1,8 @@
 package com.shiva.familyfitnessservice.service;
 
 import com.shiva.familyfitnessservice.dto.*;
-import com.shiva.familyfitnessservice.model.AvailableTrackersInfoEntity;
-import com.shiva.familyfitnessservice.model.ManageTrackersInfoEntity;
-import com.shiva.familyfitnessservice.model.TrackerDataInfoEntity;
-import com.shiva.familyfitnessservice.model.UserInfoEntity;
-import com.shiva.familyfitnessservice.repository.AvailableTrackersInfoRepository;
-import com.shiva.familyfitnessservice.repository.ManageTrackersInfoRepository;
-import com.shiva.familyfitnessservice.repository.TrackerDataInfoRepository;
-import com.shiva.familyfitnessservice.repository.UserInfoRepository;
+import com.shiva.familyfitnessservice.model.*;
+import com.shiva.familyfitnessservice.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +33,9 @@ public class FamilyFitnessService {
 
     @Autowired
     private TrackerDataInfoRepository trackerDataInfoRepository;
+
+    @Autowired
+    private TrackerDataAccessInfoRepository trackerDataAccessInfoRepository;
 
     public void registerUser(UserDto userInfoDto) {
         UserInfoEntity userObj = userInfoRepository.findByUserId(userInfoDto.getUserId());
@@ -148,14 +145,27 @@ public class FamilyFitnessService {
         trackerDataInfoRepository.save(trackerDataInfoEntity);
     }
 
-//    public void updateTrackerSyncTime(TrackerDataDto trackerDataDto) {
-//        ManageTrackersInfoEntity trackerDataInfoEntity = ManageTrackersInfoEntity
-//                .builder()
-//                .userId(trackerDataDto.getUserId())
-//                .trackerId(trackerDataDto.getTrackerId())
-//                .build();
-//        trackerDataInfoRepository.save(trackerDataInfoEntity);
-//    }
+    public Integer requestTrackerDataAccess(TrackerDataAccessDto trackerDataAccessDto,
+                                            String userId) {
+        UserInfoEntity dependantInfoEntity = userInfoRepository.findByEmailId(trackerDataAccessDto.getDependantEmail());
+        if (dependantInfoEntity != null) {
+            TrackerDataAccessInfoEntity trackerDataAccessInfoEntity = trackerDataAccessInfoRepository
+                    .findByDependantEmail(trackerDataAccessDto.getDependantEmail());
+            if (trackerDataAccessInfoEntity == null) {
+                trackerDataAccessInfoEntity = new TrackerDataAccessInfoEntity();
+            }
+            trackerDataAccessInfoEntity.setDependantId(dependantInfoEntity.getUserId());
+            trackerDataAccessInfoEntity.setDependantEmail(trackerDataAccessDto.getDependantEmail());
+            trackerDataAccessInfoEntity.setUserId(userId);
+            trackerDataAccessInfoEntity.setRelationship(trackerDataAccessDto.getRelationship());
+            trackerDataAccessInfoEntity.setStatus(0);
+            trackerDataAccessInfoRepository.save(trackerDataAccessInfoEntity);
+            return 1;
+        } else {
+            return 0;
+        }
+
+    }
 }
 
 
