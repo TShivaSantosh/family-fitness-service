@@ -28,4 +28,5 @@ public class UserRegistrationController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
     }
+
 }

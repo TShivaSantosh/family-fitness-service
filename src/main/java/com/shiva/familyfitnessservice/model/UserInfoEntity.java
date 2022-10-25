@@ -20,4 +20,5 @@ public class UserInfoEntity {
     private String userId;
     private String emailId;
     private String imageUrl;
+    private String userName;
 }

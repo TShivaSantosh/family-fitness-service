@@ -8,15 +8,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -38,16 +33,15 @@ public class FamilyFitnessService {
     private TrackerDataAccessInfoRepository trackerDataAccessInfoRepository;
 
     public void registerUser(UserDto userInfoDto) {
-        UserInfoEntity userObj = userInfoRepository.findByUserId(userInfoDto.getUserId());
-        if (userObj == null){
-            UserInfoEntity userInfoEntity = UserInfoEntity
-                    .builder()
-                    .userId(userInfoDto.getUserId())
-                    .emailId(userInfoDto.getEmailId())
-                    .imageUrl(userInfoDto.getImageUrl())
-                    .build();
-            userInfoRepository.save(userInfoEntity);
+        UserInfoEntity userInfoEntity = userInfoRepository.findByUserId(userInfoDto.getUserId());
+        if (userInfoEntity == null){
+            userInfoEntity = new UserInfoEntity();
         }
+        userInfoEntity.setUserId(userInfoDto.getUserId());
+        userInfoEntity.setEmailId(userInfoDto.getEmailId());
+        userInfoEntity.setImageUrl(userInfoDto.getImageUrl());
+        userInfoEntity.setUserName(userInfoDto.getUserName());
+        userInfoRepository.save(userInfoEntity);
     }
 
     public AvailableTrackersDto availableTrackers() {
@@ -157,14 +151,60 @@ public class FamilyFitnessService {
             trackerDataAccessInfoEntity.setDependantId(dependantInfoEntity.getUserId());
             trackerDataAccessInfoEntity.setDependantEmail(trackerDataAccessDto.getDependantEmail());
             trackerDataAccessInfoEntity.setUserId(userId);
+            trackerDataAccessInfoEntity.setImageUrl(dependantInfoEntity.getImageUrl());
             trackerDataAccessInfoEntity.setRelationship(trackerDataAccessDto.getRelationship());
-            trackerDataAccessInfoEntity.setStatus(0);
+            trackerDataAccessInfoEntity.setStatus(2);
             trackerDataAccessInfoRepository.save(trackerDataAccessInfoEntity);
             return 1;
         } else {
             return 0;
         }
 
+    }
+
+    public List<Notification> getNotifications(String userId) {
+       List<TrackerDataAccessInfoEntity> trackerDataAccessInfoEntities = trackerDataAccessInfoRepository
+               .findByDependantId(userId);
+       List<Notification> notificationsList = new ArrayList<Notification>();
+       for (TrackerDataAccessInfoEntity trackerDataAccessInfoEntity: trackerDataAccessInfoEntities) {
+           UserInfoEntity userInfoEntity = userInfoRepository.findByUserId(trackerDataAccessInfoEntity.getUserId());
+           Notification notification = Notification
+                   .builder()
+                   .userName(userInfoEntity.getUserName())
+                   .relationship(trackerDataAccessInfoEntity.getRelationship())
+                   .status(trackerDataAccessInfoEntity.getStatus())
+                   .userId(userInfoEntity.getUserId())
+                   .imageUrl(userInfoEntity.getImageUrl())
+                   .build();
+           notificationsList.add(notification);
+       }
+       return notificationsList;
+    }
+
+
+    public List<Notification> getFamilyMembers(String userId) {
+        List<TrackerDataAccessInfoEntity> trackerDataAccessInfoEntities = trackerDataAccessInfoRepository
+                .findByUserId(userId);
+        List<Notification> notificationsList = new ArrayList<Notification>();
+        for (TrackerDataAccessInfoEntity trackerDataAccessInfoEntity: trackerDataAccessInfoEntities) {
+            UserInfoEntity dependantInfoEntity = userInfoRepository.findByUserId(trackerDataAccessInfoEntity.getDependantId());
+            Notification notification = Notification
+                    .builder()
+                    .userName(dependantInfoEntity.getUserName())
+                    .relationship(trackerDataAccessInfoEntity.getRelationship())
+                    .status(trackerDataAccessInfoEntity.getStatus())
+                    .userId(dependantInfoEntity.getUserId())
+                    .imageUrl(dependantInfoEntity.getImageUrl())
+                    .build();
+            notificationsList.add(notification);
+        }
+        return notificationsList;
+    }
+
+    public void acceptTrackerDataAccess(Notification notification, String dependantUserId) {
+        TrackerDataAccessInfoEntity trackerDataAccessInfoEntity = trackerDataAccessInfoRepository.findByDependantIdAndUserId(dependantUserId, notification.getUserId());
+        trackerDataAccessInfoEntity.setStatus(notification.getStatus());
+        trackerDataAccessInfoRepository.save(trackerDataAccessInfoEntity);
     }
 }
 

@@ -25,4 +25,5 @@ public class TrackerDataAccessInfoEntity {
     * */
     private Integer status;
     private String userId;
+    private String imageUrl;
 }
