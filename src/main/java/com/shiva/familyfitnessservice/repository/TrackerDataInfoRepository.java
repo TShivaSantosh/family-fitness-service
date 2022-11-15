@@ -8,14 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Repository
 public interface TrackerDataInfoRepository extends JpaRepository<TrackerDataInfoEntity, Long> {
 
-    @Query(value = "SELECT tdie FROM TrackerDataInfoEntity tdie WHERE tdie.userId=:userId AND tdie.trackerId=:trackerId")
-    Page<TrackerDataInfoEntity> findByUserIdAndTrackerId(@Param("userId") String userId, @Param("trackerId") Integer trackerId, Pageable pageable);
+    @Query(value = "SELECT tdie FROM TrackerDataInfoEntity tdie WHERE tdie.date >= :sevenDaysAgoDate AND tdie.userId=:userId AND tdie.trackerId=:trackerId")
+    List<TrackerDataInfoEntity> getByUserIdAndTrackerId(@Param("userId") String userId, @Param("trackerId") Integer trackerId, @Param("sevenDaysAgoDate") LocalDateTime sevenDaysAgoDate);
 
     @Query(value = "SELECT tdie FROM TrackerDataInfoEntity tdie WHERE tdie.userId=:userId AND tdie.trackerId=:trackerId")
     List<TrackerDataInfoEntity> getByUserIdAndTrackerId(@Param("userId") String userId, @Param("trackerId") Integer trackerId);

@@ -10,8 +10,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -93,12 +95,14 @@ public class FamilyFitnessService {
         manageTrackersInfoEntity.setTrackerId(linkTrackerDto.getTrackerId());
         manageTrackersInfoEntity.setName(linkTrackerDto.getTrackerName());
         manageTrackersInfoEntity.setImageUrl(linkTrackerDto.getTrackerImageUrl());
+        manageTrackersInfoEntity.setUpdatedAt(LocalDateTime.now());
         manageTrackersInfoRepository.save(manageTrackersInfoEntity);
     }
 
     public List<TrackerDataDto> getTrackerData(Integer trackerId, String userId) {
         Pageable pageable = PageRequest.of(0, 7 , Sort.by("date").descending());
-        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.findByUserIdAndTrackerId(userId, trackerId, pageable).getContent();
+        LocalDate sevenDaysAgoDate = LocalDate.now().minusDays(7);
+        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.getByUserIdAndTrackerId(userId, trackerId, sevenDaysAgoDate.atStartOfDay());
         List<TrackerDataDto> trackerDataDtoList = new ArrayList<TrackerDataDto>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         for (TrackerDataInfoEntity trackerDataInfoEntity: trackerDataInfoEntityList
@@ -205,6 +209,10 @@ public class FamilyFitnessService {
         TrackerDataAccessInfoEntity trackerDataAccessInfoEntity = trackerDataAccessInfoRepository.findByDependantIdAndUserId(dependantUserId, notification.getUserId());
         trackerDataAccessInfoEntity.setStatus(notification.getStatus());
         trackerDataAccessInfoRepository.save(trackerDataAccessInfoEntity);
+    }
+
+    public void unlinkTracker(String userId, Integer trackerId) {
+        manageTrackersInfoRepository.deleteByUserIdAndTrackerId(userId,trackerId);
     }
 }
 

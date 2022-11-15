@@ -61,4 +61,16 @@ public class ManageTrackersController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
         }
     }
+
+    @PostMapping("familyfitness/{trackerId}/unlink")
+    public ResponseEntity<ManageTrackersDto> linkTracker(@PathVariable(name = "trackerId") Integer trackerId,
+                                                         @RequestHeader(name = "user_id") String userId) {
+        try {
+            familyFitnessService.unlinkTracker(userId, trackerId);
+            return ResponseEntity.ok(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+        }
+    }
 }
