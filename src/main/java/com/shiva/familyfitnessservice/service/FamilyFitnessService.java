@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -100,9 +101,12 @@ public class FamilyFitnessService {
     }
 
     public List<TrackerDataDto> getTrackerData(Integer trackerId, String userId) {
-        Pageable pageable = PageRequest.of(0, 7 , Sort.by("date").descending());
-        LocalDate sevenDaysAgoDate = LocalDate.now().minusDays(7);
-        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.getByUserIdAndTrackerId(userId, trackerId, sevenDaysAgoDate.atStartOfDay());
+        LocalDate monday = LocalDate.now();
+        while (monday.getDayOfWeek() != DayOfWeek.MONDAY)
+        {
+            monday = monday.minusDays(1);
+        }
+        List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.getByUserIdAndTrackerId(userId, trackerId, monday.atStartOfDay());
         List<TrackerDataDto> trackerDataDtoList = new ArrayList<TrackerDataDto>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         for (TrackerDataInfoEntity trackerDataInfoEntity: trackerDataInfoEntityList
@@ -121,6 +125,7 @@ public class FamilyFitnessService {
     }
 
     public void saveTrackerData(TrackerDataDto trackerDataDto, Integer trackerId, String userId) throws Exception {
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate dateTime = LocalDate.parse(trackerDataDto.getDate(), formatter);
         List<TrackerDataInfoEntity> trackerDataInfoEntityList = trackerDataInfoRepository.getByUserIdAndTrackerId(userId, trackerId);
@@ -141,6 +146,10 @@ public class FamilyFitnessService {
         trackerDataInfoEntity.setDate(dateTime.atStartOfDay());
         trackerDataInfoEntity.setTrackerId(trackerId);
         trackerDataInfoRepository.save(trackerDataInfoEntity);
+    }
+
+    public void deleteTrackerData(Integer trackerId, String userId) throws Exception {
+        trackerDataInfoRepository.deleteByUserIdAndTrackerId(userId, trackerId);
     }
 
     public Integer requestTrackerDataAccess(TrackerDataAccessDto trackerDataAccessDto,
@@ -213,6 +222,7 @@ public class FamilyFitnessService {
 
     public void unlinkTracker(String userId, Integer trackerId) {
         manageTrackersInfoRepository.deleteByUserIdAndTrackerId(userId,trackerId);
+        trackerDataInfoRepository.deleteByUserIdAndTrackerId(userId, trackerId);
     }
 }
 

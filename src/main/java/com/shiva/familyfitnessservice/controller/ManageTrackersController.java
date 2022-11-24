@@ -40,6 +40,7 @@ public class ManageTrackersController {
                                                           @PathVariable(name = "trackerId") Integer trackerId,
                                                           @RequestHeader(name = "user_id") String userId) {
         try {
+            familyFitnessService.deleteTrackerData(trackerId, userId);
             for (TrackerDataDto trackerDataDto: trackersDataDto) {
                 familyFitnessService.saveTrackerData(trackerDataDto, trackerId, userId);
             }
